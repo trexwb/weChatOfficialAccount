@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>公众号HTML插入助手 — 使用指南</title>
+<style>
+  :root {
+    --green: #07c160; --green-dark: #05964a; --green-soft: #e6f7ee;
+    --ink: #1a1a1a; --muted: #777; --line: #e8e8e8; --bg: #f7f8fa; --card: #fff;
+    --amber: #b25e00; --red: #d93025; --blue: #1a5fb4;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; padding: 0 0 60px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--ink); line-height: 1.75;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 20px; }
+
+  /* ── 头部 ── */
+  header.hero {
+    background: linear-gradient(135deg, #07c160 0%, #05964a 100%);
+    color: #fff; padding: 44px 20px 36px; margin-bottom: 32px; text-align: center;
+  }
+  header.hero h1 { margin: 0 0 6px; font-size: 26px; }
+  header.hero p { margin: 0 auto; opacity: .92; font-size: 14px; max-width: 640px; }
+  .hero-badges { margin-top: 14px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .hero-badge {
+    background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.4);
+    border-radius: 999px; padding: 3px 12px; font-size: 12px;
+  }
+
+  /* ── 目录 ── */
+  nav.toc {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 16px 22px; margin-bottom: 28px; font-size: 13px;
+  }
+  nav.toc b { display: block; margin-bottom: 8px; }
+  nav.toc ol { margin: 0; padding-left: 20px; }
+  nav.toc a { color: var(--blue); text-decoration: none; }
+  nav.toc a:hover { text-decoration: underline; }
+
+  /* ── 章节 ── */
+  section.card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 24px 28px; margin-bottom: 20px;
+  }
+  section.card h2 {
+    margin: 0 0 16px; font-size: 18px; border-left: 4px solid var(--green); padding-left: 10px;
+  }
+  section.card h3 { margin: 20px 0 8px; font-size: 15px; }
+  section.card h3:first-of-type { margin-top: 4px; }
+  p, li { font-size: 14px; }
+  .muted { color: var(--muted); font-size: 13px; }
+
+  /* ── 步骤 ── */
+  .steps { counter-reset: step; display: grid; gap: 10px; margin: 12px 0; }
+  .step {
+    counter-increment: step; display: flex; gap: 12px; align-items: flex-start;
+    background: #fafafa; border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px;
+  }
+  .step::before {
+    content: counter(step); flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%;
+    background: var(--green); color: #fff; font-size: 13px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center; margin-top: 2px;
+  }
+  .step b { display: block; font-size: 14px; }
+  .step span { font-size: 13px; color: var(--muted); }
+
+  /* ── 功能网格 ── */
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; margin: 12px 0; }
+  .feat { border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; background: #fafafa; }
+  .feat .t { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+  .feat .t .tag { display: inline-block; font-size: 11px; font-weight: 500; border-radius: 6px; padding: 1px 8px; margin-left: 6px; vertical-align: 2px; }
+  .tag.hot { background: var(--green-soft); color: var(--green-dark); }
+  .tag.opt { background: #f2f2f2; color: #777; }
+  .feat p { margin: 0; font-size: 13px; color: #444; }
+
+  /* ── 表格 ── */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 12px 0; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: #fafafa; font-weight: 600; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+  kbd {
+    background: #f2f2f2; border: 1px solid #ddd; border-radius: 4px;
+    padding: 1px 6px; font-size: 12px; font-family: inherit; color: #555; white-space: nowrap;
+  }
+  code {
+    background: #f2f2f2; border-radius: 4px; padding: 1px 6px; font-size: 12px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  /* ── FAQ ── */
+  details {
+    border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; margin-bottom: 10px; background: #fafafa;
+  }
+  details summary { cursor: pointer; font-size: 14px; font-weight: 600; outline: none; }
+  details p { margin: 10px 0 2px; font-size: 13px; color: #444; }
+
+  /* ── 提示框 ── */
+  .tip {
+    border-radius: 10px; padding: 12px 16px; font-size: 13px; margin: 12px 0;
+    background: #fff8f0; border: 1px solid #f0d9b8; color: var(--amber);
+  }
+  .tip.green { background: var(--green-soft); border-color: #b7e6c9; color: var(--green-dark); }
+
+  /* ── 流程 ── */
+  .flow { display: flex; align-items: stretch; gap: 8px; flex-wrap: wrap; margin: 14px 0; }
+  .flow .node {
+    background: #fafafa; border: 1px solid var(--line); border-radius: 10px;
+    padding: 10px 14px; font-size: 13px; flex: 1; min-width: 130px; text-align: center;
+  }
+  .flow .node b { display: block; font-size: 13px; }
+  .flow .node span { font-size: 12px; color: var(--muted); }
+  .flow .arrow { align-self: center; color: var(--muted); font-size: 18px; }
+
+  footer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 36px; }
+
+  /* ── 深色模式 ── */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ink: #e0e0e0; --muted: #888; --line: #333; --bg: #141414; --card: #1e1e1e;
+      --green-soft: #17301f;
+    }
+    .feat, .step, details { background: #262626; }
+    th { background: #262626; }
+    kbd, code { background: #2a2a2a; border-color: #3a3a3a; color: #bbb; }
+    .tip { background: #2f2616; border-color: #5a4a1a; }
+    .tip.green { background: #17301f; border-color: #2a5a3a; }
+    .flow .node { background: #262626; }
+  }
+
+  @media (max-width: 640px) {
+    section.card { padding: 18px 16px; }
+    header.hero { padding: 32px 16px 26px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <h1>公众号HTML插入助手 · 使用指南</h1>
+  <p>在微信公众号文章编辑页自由插入自定义 HTML 的 Chrome 扩展：代码编辑器、模板库、净化、表格生成、跨页面右键插入一应俱全。</p>
+  <div class="hero-badges">
+    <span class="hero-badge">v1.0.0</span>
+    <span class="hero-badge">Chrome / Edge / Chromium 系</span>
+    <span class="hero-badge">纯本地 · 无远程依赖</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <nav class="toc">
+    <b>目录</b>
+    <ol>
+      <li><a href="#install">安装与加载</a></li>
+      <li><a href="#quick">快速上手</a></li>
+      <li><a href="#features">功能详解</a></li>
+      <li><a href="#shortcuts">快捷键速查</a></li>
+      <li><a href="#workflow">工作流程</a></li>
+      <li><a href="#faq">常见问题排查</a></li>
+      <li><a href="#settings">设置页说明</a></li>
+    </ol>
+  </nav>
+
+  <!-- ═════════ 安装 ═════════ -->
+  <section class="card" id="install">
+    <h2>一、安装与加载</h2>
+    <div class="steps">
+      <div class="step"><div><b>打开扩展管理页</b><span>Chrome 地址栏输入 <code>chrome://extensions</code> 回车</span></div></div>
+      <div class="step"><div><b>开启开发者模式</b><span>右上角「开发者模式」开关打开</span></div></div>
+      <div class="step"><div><b>加载扩展目录</b><span>点击「加载已解压的扩展程序」，选择本项目目录（含 <code>manifest.json</code> 的根目录）</span></div></div>
+    </div>
+    <div class="tip green">💡 修改代码后：在 <code>chrome://extensions</code> 点「重新加载」，并刷新公众号编辑页（两步都要，否则旧页面会提示扩展上下文失效）。</div>
+  </section>
+
+  <!-- ═════════ 快速上手 ═════════ -->
+  <section class="card" id="quick">
+    <h2>二、快速上手</h2>
+    <div class="steps">
+      <div class="step"><div><b>打开公众号文章编辑页</b><span>地址形如 <code>mp.weixin.qq.com/cgi-bin/appmsg?...&amp;action=edit...</code>，等待右下角悬浮按钮就绪（提示从「等待编辑器…」变为「插入 HTML」）</span></div></div>
+      <div class="step"><div><b>点击悬浮按钮打开弹窗</b><span>默认分屏视图：左侧代码、右侧实时预览</span></div></div>
+      <div class="step"><div><b>输入或粘贴 HTML</b><span>可点标题栏「读取」按钮载入编辑器现有内容；或点「模板 ▾」插入常用代码段</span></div></div>
+      <div class="step"><div><b>预览确认后插入</b><span>点「插入到编辑器」或按 <kbd>⌘↵</kbd> / <kbd>Ctrl+Enter</kbd>。编辑器内有选区时替换选区（全选 = 整体替换），无选区时追加到文章末尾</span></div></div>
+    </div>
+    <div class="tip">⚠️ 插入是「追加/替换选区」，不会清空文章已有内容——这是设计行为，可放心使用。</div>
+  </section>
+
+  <!-- ═════════ 功能详解 ═════════ -->
+  <section class="card" id="features">
+    <h2>三、功能详解</h2>
+
+    <div class="grid">
+      <div class="feat">
+        <div class="t">代码编辑器 <span class="tag hot">核心</span></div>
+        <p>CodeMirror 引擎：HTML 语法高亮、行号、括号匹配、智能缩进。Tab 缩进、Shift+Tab 反缩进，多行选区整体生效。</p>
+      </div>
+      <div class="feat">
+        <div class="t">查找替换 <span class="tag hot">核心</span></div>
+        <p>弹窗内按 <kbd>⌘F</kbd> / <kbd>Ctrl+F</kbd> 打开搜索面板，支持替换；长 HTML 定位利器。</p>
+      </div>
+      <div class="feat">
+        <div class="t">模板库 <span class="tag hot">高频</span></div>
+        <p>「模板 ▾」保存当前内容为模板、一键插入、删除管理；数据存 chrome.storage，与设置页双向同步。</p>
+      </div>
+      <div class="feat">
+        <div class="t">草稿自动保存 <span class="tag hot">高频</span></div>
+        <p>输入内容防抖自动保存，关闭弹窗后重新打开自动恢复；插入成功后自动清除草稿。</p>
+      </div>
+      <div class="feat">
+        <div class="t">格式化 / 压缩</div>
+        <p>一键按标签嵌套美化代码；一键压缩体积（保留 pre/script 等原样内容）。</p>
+      </div>
+      <div class="feat">
+        <div class="t">公众号适配净化 <span class="tag opt">默认开启</span></div>
+        <p>插入时移除 script/iframe/事件属性，检查未闭合标签并提示；可点按钮关闭。</p>
+      </div>
+      <div class="feat">
+        <div class="t">表格生成</div>
+        <p>粘贴 Excel 复制区域（Tab 分隔）或 CSV，自动识别分隔符与引号，生成带表头的公众号表格 HTML。</p>
+      </div>
+      <div class="feat">
+        <div class="t">跨页面右键插入</div>
+        <p>任意网页选中文字 → 右键 →「插入选中内容到公众号编辑器」，自动找到已打开的编辑页并切入弹窗。</p>
+      </div>
+      <div class="feat">
+        <div class="t">双向同步</div>
+        <p>弹窗打开期间，公众号编辑器内的改动（防抖 800ms）自动反映到弹窗代码区。</p>
+      </div>
+      <div class="feat">
+        <div class="t">弹窗拖动 / 缩放</div>
+        <p>标题栏拖动移动弹窗；右下角拖拽调整大小（最小 640×420）。</p>
+      </div>
+      <div class="feat">
+        <div class="t">深色模式</div>
+        <p>跟随系统 <code>prefers-color-scheme</code> 自动切换，含代码高亮配色。</p>
+      </div>
+      <div class="feat">
+        <div class="t">减弱动态效果</div>
+        <p>系统开启「减弱动态效果」时自动关闭动画，关闭弹窗有定时兜底，不会残留。</p>
+      </div>
+    </div>
+
+    <h3>净化按钮详解</h3>
+    <p>「净化」是插入前的一道自动清理工序（绿色高亮 = 开启）。它会：</p>
+    <table>
+      <thead><tr><th>处理</th><th>内容</th><th>原因</th></tr></thead>
+      <tbody>
+        <tr><td>移除标签</td><td><code>script / iframe / object / embed / link / meta / base / form</code></td><td>公众号保存时会过滤，提前移除避免插入后丢失或保存异常</td></tr>
+        <tr><td>移除事件属性</td><td>所有 <code>on*</code> 属性（onclick、onerror 等）</td><td>公众号不支持且属安全隐患</td></tr>
+        <tr><td>闭合检查</td><td>统计开闭标签数量差并警告</td><td>未闭合标签会让编辑器渲染错乱</td></tr>
+      </tbody>
+    </table>
+    <p class="muted">净化只影响插入输出，不改动编辑区代码；发现问题会黄色 toast 提示前 3 条。</p>
+  </section>
+
+  <!-- ═════════ 快捷键 ═════════ -->
+  <section class="card" id="shortcuts">
+    <h2>四、快捷键速查</h2>
+    <table>
+      <thead><tr><th>快捷键</th><th>功能</th><th>适用位置</th></tr></thead>
+      <tbody>
+        <tr><td><kbd>Tab</kbd> / <kbd>Shift+Tab</kbd></td><td>缩进 / 反缩进（多行选区整体生效）</td><td>代码编辑区</td></tr>
+        <tr><td><kbd>⌘F</kbd> / <kbd>Ctrl+F</kbd></td><td>查找替换</td><td>代码编辑区</td></tr>
+        <tr><td><kbd>⌘↵</kbd> / <kbd>Ctrl+Enter</kbd></td><td>插入到编辑器</td><td>代码编辑区</td></tr>
+        <tr><td><kbd>Esc</kbd></td><td>关闭弹窗（搜索框/表格子窗口打开时先关闭它们）</td><td>全局</td></tr>
+        <tr><td>右键菜单</td><td>选中文字 →「插入选中内容到公众号编辑器」（跨页面）</td><td>任意网页</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ═════════ 工作流程 ═════════ -->
+  <section class="card" id="workflow">
+    <h2>五、工作流程</h2>
+    <div class="flow">
+      <div class="node"><b>入口</b><span>悬浮按钮 / 右键菜单 / 跨页面插入</span></div>
+      <span class="arrow">→</span>
+      <div class="node"><b>编辑弹窗</b><span>CodeMirror 编辑 + 预览 + 模板 + 草稿</span></div>
+      <span class="arrow">→</span>
+      <div class="node"><b>净化（可选）</b><span>去脚本/事件属性 + 闭合检查</span></div>
+      <span class="arrow">→</span>
+      <div class="node"><b>插入</b><span>替换选区 / 追加末尾</span></div>
+    </div>
+    <p class="muted">插入走 DOM 层 + 事件通知，公众号编辑器改版时靠「三级选择器回退」保持兼容。</p>
+  </section>
+
+  <!-- ═════════ FAQ ═════════ -->
+  <section class="card" id="faq">
+    <h2>六、常见问题排查</h2>
+
+    <details>
+      <summary>悬浮按钮没出现，或点击无反应？</summary>
+      <p>1) 确认当前是文章编辑页（URL 含 <code>action=edit</code>）；2) 扩展重载后必须刷新页面（扩展上下文失效会静默无反应）；3) 按钮提示「等待编辑器…」说明编辑器未就绪，稍等即可。</p>
+    </details>
+
+    <details>
+      <summary>点「模板」报 <code>Extension context invalidated</code>？</summary>
+      <p>扩展在 <code>chrome://extensions</code> 被重新加载后，旧页面仍运行失效的脚本。刷新页面即可；新版本已内置兜底，会提示「请刷新页面后重试」而非报错。</p>
+    </details>
+
+    <details>
+      <summary>右键「插入选中内容」没反应？</summary>
+      <p>1) 需要先打开一篇文章的编辑页标签（跨页面插入依赖它）；2) 工具栏徽标 ✗ = 未找到编辑页，! = 页面处理出错，✓ = 成功；3) 扩展重载后旧页面会自动注入恢复，仍失败就刷新一次编辑页。</p>
+    </details>
+
+    <details>
+      <summary>插入后样式/结构丢失？</summary>
+      <p>公众号保存文章时会过滤部分标签与属性。开启「净化」可提前移除并提示；若确实需要某些标签（如 iframe），请确认公众号是否支持该场景。</p>
+    </details>
+
+    <details>
+      <summary>提示「未找到公众号编辑器」？</summary>
+      <p>公众号编辑器为懒加载，等待悬浮按钮变为就绪状态后再操作；若持续报错，可能是页面结构改版，请反馈控制台信息以便更新选择器。</p>
+    </details>
+
+    <details>
+      <summary>深色模式没生效？</summary>
+      <p>扩展跟随系统 <code>prefers-color-scheme</code>，需系统处于深色外观；浏览器内也可强制指定。</p>
+    </details>
+  </section>
+
+  <!-- ═════════ 设置页 ═════════ -->
+  <section class="card" id="settings">
+    <h2>七、设置页说明</h2>
+    <p>入口：<code>chrome://extensions</code> → 本扩展「详情」→「扩展程序选项」（或右键扩展图标 → 选项）。</p>
+    <table>
+      <thead><tr><th>设置项</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>模板管理</td><td>重命名 / 删除 / 导出 JSON / 导入 JSON（同名覆盖、其余追加）/ 清空全部</td></tr>
+        <tr><td>净化默认开关</td><td>控制弹窗内「净化」按钮的默认状态（默认开启）</td></tr>
+      </tbody>
+    </table>
+    <p class="muted">模板与设置存于 chrome.storage.local，弹窗与设置页实时共享。</p>
+  </section>
+
+  <footer>公众号HTML插入助手 · 使用指南 · v1.0.0 · 2026-08-25</footer>
+</div>
+</body>
+</html>
