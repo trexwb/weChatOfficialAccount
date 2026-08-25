@@ -1,0 +1,45 @@
+{
+  "manifest_version": 3,
+  "name": "公众号HTML插入助手",
+  "version": "1.0.0",
+  "description": "在公众号编辑页悬浮图标，插入自定义HTML",
+  "permissions": [
+    "storage",
+    "contextMenus",
+    "scripting"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "options_page": "options.html",
+  "action": {},
+  "content_scripts": [
+    {
+      "matches": [
+        "*://mp.weixin.qq.com/cgi-bin/appmsg*"
+      ],
+      "js": [
+        "lib/codemirror/codemirror.min.js",
+        "lib/codemirror/xml.min.js",
+        "lib/codemirror/javascript.min.js",
+        "lib/codemirror/css.min.js",
+        "lib/codemirror/htmlmixed.min.js",
+        "lib/codemirror/dialog.min.js",
+        "lib/codemirror/searchcursor.min.js",
+        "lib/codemirror/search.min.js",
+        "lib/codemirror/match-highlighter.min.js",
+        "lib/codemirror/matchbrackets.min.js",
+        "content.js"
+      ],
+      "css": [
+        "lib/codemirror/codemirror.min.css",
+        "lib/codemirror/dialog.min.css",
+        "styles.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "host_permissions": [
+    "*://mp.weixin.qq.com/*"
+  ]
+}

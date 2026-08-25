@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>公众号HTML插入助手 — 设置</title>
+<style>
+  :root {
+    --green: #07c160; --green-dark: #05964a;
+    --ink: #1a1a1a; --muted: #888;
+    --line: #e8e8e8; --bg: #f7f8fa; --card: #fff;
+    --red: #d93025;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 40px 20px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--ink); line-height: 1.7;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  header {
+    background: linear-gradient(135deg, #07c160 0%, #05964a 100%);
+    color: #fff; border-radius: 14px; padding: 24px 28px; margin-bottom: 20px;
+  }
+  header h1 { margin: 0 0 4px; font-size: 20px; }
+  header p { margin: 0; opacity: .9; font-size: 13px; }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 20px 24px; margin-bottom: 16px;
+  }
+  .card h2 { margin: 0 0 14px; font-size: 15px; border-left: 4px solid var(--green); padding-left: 10px; }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; }
+  .row .label { font-size: 14px; }
+  .row .desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .switch { position: relative; width: 42px; height: 24px; flex-shrink: 0; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .switch .slider {
+    position: absolute; inset: 0; background: #ccc; border-radius: 999px;
+    transition: background .2s; cursor: pointer;
+  }
+  .switch .slider::before {
+    content: ""; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px;
+    background: #fff; border-radius: 50%; transition: transform .2s;
+  }
+  .switch input:checked + .slider { background: var(--green); }
+  .switch input:checked + .slider::before { transform: translateX(18px); }
+  .tpl-item {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 9px 12px; border: 1px solid var(--line); border-radius: 8px; margin-bottom: 8px;
+    font-size: 13px;
+  }
+  .tpl-item .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tpl-item .ops { display: flex; gap: 6px; flex-shrink: 0; }
+  .btn {
+    padding: 5px 12px; border: 1px solid var(--line); border-radius: 6px;
+    background: #fff; font-size: 12px; color: #555; cursor: pointer;
+  }
+  .btn:hover { border-color: var(--green); color: var(--green); }
+  .btn.primary { background: var(--green); border-color: var(--green); color: #fff; }
+  .btn.primary:hover { background: var(--green-dark); }
+  .btn.danger { color: var(--red); }
+  .btn.danger:hover { border-color: var(--red); }
+  .btn-group { display: flex; gap: 8px; margin-bottom: 14px; }
+  .empty { color: var(--muted); font-size: 13px; text-align: center; padding: 18px 0; }
+  footer { text-align: center; color: var(--muted); font-size: 12px; }
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(8px);
+    background: #1a1a1a; color: #fff; padding: 8px 18px; border-radius: 8px;
+    font-size: 13px; opacity: 0; pointer-events: none; transition: all .2s;
+    z-index: 10;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ink: #e0e0e0; --muted: #888;
+      --line: #333; --bg: #1a1a1a; --card: #1f1f1f;
+    }
+    .btn { background: #2a2a2a; border-color: #3a3a3a; color: #ccc; }
+    .tpl-item { border-color: #333; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>公众号HTML插入助手</h1>
+    <p id="ver">设置</p>
+  </header>
+
+  <div class="card">
+    <h2>模板管理</h2>
+    <div class="btn-group">
+      <button class="btn primary" id="btn-export">导出模板</button>
+      <button class="btn" id="btn-import">导入模板</button>
+      <button class="btn danger" id="btn-clear">清空全部</button>
+      <input type="file" id="file-import" accept=".json" style="display:none">
+    </div>
+    <div id="tpl-list"><div class="empty">加载中…</div></div>
+  </div>
+
+  <div class="card">
+    <h2>插入设置</h2>
+    <div class="row">
+      <div>
+        <div class="label">默认开启「净化」</div>
+        <div class="desc">插入时移除 script/事件属性，并检查未闭合标签</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="sanitize-default">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>关于</h2>
+    <p style="font-size:13px;margin:0">
+      在公众号编辑页悬浮图标，插入自定义 HTML。
+      使用方式：编辑页选中文字后右键 →「插入选中内容到公众号编辑器」可直接带入弹窗；
+      模板与设置保存在浏览器扩展存储中（chrome.storage.local）。
+    </p>
+  </div>
+
+  <footer>公众号HTML插入助手 · 设置页</footer>
+  <div class="toast" id="toast"></div>
+
+  <script src="options.js"></script>
+</body>
+</html>
