@@ -11,11 +11,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
-          node-version: 20
+          node-version: 24
 
       - name: 准备私钥（优先使用 Secret，保持扩展 ID 稳定）
         run: |
@@ -39,7 +39,7 @@ jobs:
         run: node scripts/pack-crx.mjs dist/extension.zip key.pem dist/extension.crx
 
       - name: 上传产物
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: extension-build
           path: dist/
@@ -47,7 +47,7 @@ jobs:
 
       - name: 发布 Release（仅标签触发）
         if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             dist/extension.crx
