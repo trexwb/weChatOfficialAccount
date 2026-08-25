@@ -1,0 +1,55 @@
+name: build-crx
+
+# 触发方式：推送 v* 标签（自动发 Release）或手动触发（仅上传产物）
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 准备私钥（优先使用 Secret，保持扩展 ID 稳定）
+        run: |
+          if [ -n "${{ secrets.CRX_PRIVATE_KEY }}" ]; then
+            echo "${{ secrets.CRX_PRIVATE_KEY }}" | base64 -d > key.pem
+            echo "使用 Secret 中的私钥"
+          else
+            openssl genrsa -out key.pem 2048
+            echo "⚠️ 首次运行：私钥为临时生成，扩展 ID 下次会变！"
+            echo "请执行 openssl genrsa -out key.pem 2048 && base64 < key.pem 并存入 Secret CRX_PRIVATE_KEY"
+          fi
+
+      - name: 打包 ZIP（仅运行时文件）
+        run: |
+          mkdir -p dist
+          zip -r dist/extension.zip \
+            manifest.json content.js background.js options.html options.js styles.css icons lib \
+            -x "*/.git/*"
+
+      - name: 生成 CRX
+        run: node scripts/pack-crx.mjs dist/extension.zip key.pem dist/extension.crx
+
+      - name: 上传产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: extension-build
+          path: dist/
+          if-no-files-found: error
+
+      - name: 发布 Release（仅标签触发）
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/extension.crx
+            dist/extension.zip
+          generate_release_notes: true
