@@ -1,0 +1,632 @@
+/* ============================
+   公众号HTML插入助手 — 样式 v1.0.0
+   ============================ */
+
+/* ─── 悬浮按钮 ─── */
+.wx-ext-float-btn {
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  width: 52px;
+  height: 52px;
+  background: linear-gradient(135deg, #07c160 0%, #05964a 100%);
+  color: #fff;
+  border-radius: 14px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 99999;
+  box-shadow:
+    0 4px 12px rgba(7, 193, 96, 0.35),
+    0 1px 3px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  font-size: 20px;
+  line-height: 1;
+  opacity: 0.75;
+  transition:
+    transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.22s ease,
+    background 0.22s ease,
+    opacity 0.3s ease;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.wx-ext-float-btn.wx-ext-ready {
+  opacity: 1;
+}
+.wx-ext-float-btn:hover {
+  transform: translateY(-3px) scale(1.06);
+  box-shadow:
+    0 8px 24px rgba(7, 193, 96, 0.45),
+    0 2px 6px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg, #0fd46d 0%, #07c160 100%);
+}
+.wx-ext-float-btn:active {
+  transform: translateY(0) scale(0.97);
+  box-shadow: 0 2px 6px rgba(7, 193, 96, 0.25), 0 1px 2px rgba(0, 0, 0, 0.1);
+  transition-duration: 0.08s;
+}
+.wx-ext-float-btn::after {
+  content: var(--wx-ext-tip, "插入 HTML");
+  position: absolute;
+  right: calc(100% + 12px);
+  top: 50%;
+  transform: translateY(-50%) translateX(6px);
+  background: #1a1a1a;
+  color: #fff;
+  font-size: 12px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  white-space: nowrap;
+  padding: 5px 10px;
+  border-radius: 6px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+.wx-ext-float-btn:hover::after {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+/* ─── 弹窗遮罩 ─── */
+.wx-ext-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: wx-ext-fade-in 0.15s ease-out;
+}
+@keyframes wx-ext-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ─── 弹窗主体（可拖拽移动、右下角拖拽缩放） ─── */
+.wx-ext-modal {
+  position: relative; /* toast 定位基准 */
+  background: #fff;
+  border-radius: 14px;
+  width: 860px;
+  max-width: 96vw;
+  max-height: 92vh;
+  min-width: 640px;
+  min-height: 420px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  resize: both;
+  box-shadow:
+    0 24px 70px rgba(0, 0, 0, 0.28),
+    0 6px 20px rgba(0, 0, 0, 0.14);
+  animation: wx-ext-modal-in 0.2s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+.wx-ext-dragging {
+  animation: none !important;
+  transition: none !important;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: move;
+}
+@keyframes wx-ext-modal-in {
+  from { opacity: 0; transform: scale(0.93) translateY(14px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+.wx-ext-closing {
+  animation: wx-ext-modal-out 0.15s ease-in forwards !important;
+}
+@keyframes wx-ext-modal-out {
+  from { opacity: 1; transform: scale(1) translateY(0); }
+  to   { opacity: 0; transform: scale(0.95) translateY(8px); }
+}
+
+/* ─── 标题栏 ─── */
+.wx-ext-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid #f0f0f0;
+  flex-shrink: 0;
+  cursor: move;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.wx-ext-modal-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  letter-spacing: 0.02em;
+}
+.wx-ext-header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* ─── 标签页 ─── */
+.wx-ext-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 10px 22px 0;
+  border-bottom: 1px solid #f0f0f0;
+  flex-shrink: 0;
+}
+.wx-ext-tab {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 16px;
+  border: none;
+  background: none;
+  color: #888;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 8px 8px 0 0;
+  transition: color 0.15s, background 0.15s;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+.wx-ext-tab svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+.wx-ext-tab:hover { color: #444; background: #f5f5f5; }
+.wx-ext-tab.active {
+  color: #07c160;
+  border-bottom-color: #07c160;
+  background: #f0f9f4;
+}
+
+/* ─── 工具栏 ─── */
+.wx-ext-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 22px 0;
+  flex-shrink: 0;
+}
+.wx-ext-tool-btn {
+  padding: 4px 12px;
+  border: 1px solid #e0e0e0;
+  background: #fff;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #555;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.wx-ext-tool-btn:hover {
+  border-color: #07c160;
+  color: #07c160;
+  background: #f0f9f4;
+}
+.wx-ext-tool-btn.active {
+  border-color: #07c160;
+  color: #07c160;
+  background: #e6f7ee;
+}
+.wx-ext-toolbar-spacer {
+  flex: 1;
+}
+
+/* ─── 模板下拉菜单 ─── */
+.wx-ext-menu-wrap {
+  position: relative;
+}
+.wx-ext-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 220px;
+  max-height: 320px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+  z-index: 60;
+  padding: 4px;
+}
+.wx-ext-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #333;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.wx-ext-menu-item:hover {
+  background: #f5f5f5;
+}
+.wx-ext-menu-item .del {
+  color: #d93025;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.wx-ext-menu-item .del:hover {
+  text-decoration: underline;
+}
+.wx-ext-menu-sep {
+  height: 1px;
+  background: #f0f0f0;
+  margin: 4px 6px;
+}
+
+/* ─── 编辑区主体 ─── */
+.wx-ext-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-height: 280px;
+}
+.wx-ext-editor-wrap {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  background: #fafafa;
+}
+.wx-ext-editor-wrap:focus-within {
+  background: #fff;
+}
+
+/* ─── CodeMirror 主题化 ─── */
+.wx-ext-editor-wrap .CodeMirror {
+  flex: 1;
+  height: 100%;
+  font-family: "SF Mono", "Fira Code", "Menlo", Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.wx-ext-editor-wrap .CodeMirror-gutters {
+  background: #f0f0f0;
+  border-right: 1px solid #e0e0e0;
+}
+.wx-ext-editor-wrap .CodeMirror-linenumber {
+  color: #bbb;
+  font-size: 12px;
+  padding: 0 8px 0 12px;
+}
+.wx-ext-editor-wrap .CodeMirror-cursor {
+  border-left: 2px solid #07c160;
+}
+.wx-ext-editor-wrap .CodeMirror-selected {
+  background: rgba(7, 193, 96, 0.18) !important;
+}
+.wx-ext-editor-wrap .CodeMirror-focused .CodeMirror-selected {
+  background: rgba(7, 193, 96, 0.24) !important;
+}
+.wx-ext-editor-wrap .cm-s-default .cm-tag { color: #175f1f; }
+.wx-ext-editor-wrap .cm-s-default .cm-attribute { color: #1a56b8; }
+.wx-ext-editor-wrap .cm-s-default .cm-string { color: #a31515; }
+.wx-ext-editor-wrap .cm-s-default .cm-comment { color: #9c6b12; }
+.wx-ext-editor-wrap .cm-s-default .cm-keyword { color: #7d2eb0; }
+
+/* CodeMirror 搜索框 */
+.CodeMirror-dialog {
+  background: #fafafa;
+  color: #333;
+  font-size: 13px;
+  padding: 6px 12px;
+  border-bottom: 1px solid #e0e0e0;
+  z-index: 5;
+}
+.CodeMirror-dialog input {
+  font-family: inherit;
+  font-size: 13px;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  padding: 2px 8px;
+  margin: 0 4px;
+  outline: none;
+}
+.CodeMirror-dialog input:focus {
+  border-color: #07c160;
+}
+
+/* ─── 预览区 ─── */
+.wx-ext-preview-pane {
+  flex: 1;
+  padding: 16px 20px;
+  overflow-y: auto;
+  border-left: 1px solid #e8e8e8;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #333;
+  background: #fff;
+}
+.wx-ext-preview-pane:empty::before {
+  content: "预览内容为空";
+  color: #ccc;
+  font-style: italic;
+}
+
+/* ─── 表格生成子弹窗 ─── */
+.wx-ext-subdialog {
+  position: absolute;
+  inset: 0;
+  z-index: 80;
+  background: rgba(255, 255, 255, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.wx-ext-subdialog-box {
+  width: 100%;
+  max-width: 640px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px 22px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+}
+.wx-ext-subdialog-box h4 {
+  margin: 0 0 12px;
+  font-size: 15px;
+}
+.wx-ext-subdialog-box textarea {
+  width: 100%;
+  min-height: 180px;
+  resize: vertical;
+  box-sizing: border-box;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-family: "SF Mono", "Fira Code", "Menlo", Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #333;
+  outline: none;
+}
+.wx-ext-subdialog-box textarea:focus {
+  border-color: #07c160;
+}
+.wx-ext-subdialog-box label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #555;
+  margin: 10px 0 0;
+  cursor: pointer;
+}
+.wx-ext-subdialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+/* ─── 底部栏 ─── */
+.wx-ext-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 22px;
+  border-top: 1px solid #f0f0f0;
+  background: #fff;
+  flex-shrink: 0;
+  gap: 16px;
+}
+.wx-ext-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  min-width: 0;
+}
+.wx-ext-count {
+  font-size: 12px;
+  color: #aaa;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.wx-ext-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #ccc;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.wx-ext-hint kbd {
+  background: #f2f2f2;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 11px;
+  font-family: inherit;
+  color: #666;
+}
+.wx-ext-modal-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* ─── 按钮 ─── */
+button.wx-ext-btn-icon {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border: 1.5px solid #e0e0e0;
+  background: #fff;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #555;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s, transform 0.1s;
+}
+button.wx-ext-btn-icon svg {
+  width: 13px;
+  height: 13px;
+}
+button.wx-ext-btn-icon:hover {
+  border-color: #07c160;
+  color: #07c160;
+  background: #f0f9f4;
+  transform: translateY(-1px);
+}
+button.wx-ext-btn-cancel,
+button.wx-ext-btn-csv-cancel {
+  padding: 9px 20px;
+  border: none;
+  border-radius: 8px;
+  background: #f2f2f2;
+  color: #555;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+button.wx-ext-btn-cancel:hover,
+button.wx-ext-btn-csv-cancel:hover {
+  background: #e4e4e4;
+  transform: translateY(-1px);
+}
+button.wx-ext-btn-confirm {
+  padding: 9px 22px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #07c160 0%, #05964a 100%);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(7, 193, 96, 0.32);
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+}
+button.wx-ext-btn-confirm:hover {
+  background: linear-gradient(135deg, #0fd46d 0%, #07c160 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(7, 193, 96, 0.42);
+}
+button.wx-ext-btn-confirm:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 5px rgba(7, 193, 96, 0.28);
+}
+
+/* ─── 内联提示 Toast ─── */
+.wx-ext-toast {
+  position: absolute;
+  bottom: 70px;
+  left: 50%;
+  transform: translateX(-50%) translateY(6px);
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 90;
+}
+.wx-ext-toast-show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.wx-ext-toast-success {
+  background: #1a1a1a;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+.wx-ext-toast-error {
+  background: #fff0f0;
+  color: #d93025;
+  border: 1px solid #fbb;
+  box-shadow: 0 4px 16px rgba(217, 48, 37, 0.15);
+}
+.wx-ext-toast-warn {
+  background: #fff8e6;
+  color: #b25e00;
+  border: 1px solid #f0d9a8;
+  box-shadow: 0 4px 16px rgba(178, 94, 0, 0.15);
+}
+
+/* ─── 深色模式 ─── */
+@media (prefers-color-scheme: dark) {
+  .wx-ext-modal {
+    background: #1f1f1f;
+    color: #e0e0e0;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.6), 0 6px 20px rgba(0, 0, 0, 0.4);
+  }
+  .wx-ext-modal-header { border-bottom-color: #333; }
+  .wx-ext-modal-header h3 { color: #e0e0e0; }
+  .wx-ext-tabs { border-bottom-color: #333; }
+  .wx-ext-tab { color: #999; }
+  .wx-ext-tab:hover { color: #ddd; background: #2a2a2a; }
+  .wx-ext-tab.active { color: #07c160; border-bottom-color: #07c160; background: #17301f; }
+
+  .wx-ext-tool-btn { background: #2a2a2a; border-color: #3a3a3a; color: #ccc; }
+  .wx-ext-tool-btn:hover { border-color: #07c160; color: #07c160; background: #17301f; }
+  .wx-ext-tool-btn.active { background: #17301f; color: #07c160; border-color: #07c160; }
+
+  .wx-ext-menu { background: #2a2a2a; border-color: #3a3a3a; box-shadow: 0 8px 24px rgba(0,0,0,.5); }
+  .wx-ext-menu-item { color: #ddd; }
+  .wx-ext-menu-item:hover { background: #333; }
+  .wx-ext-menu-sep { background: #3a3a3a; }
+
+  .wx-ext-editor-wrap { background: #1f1f1f; }
+  .wx-ext-editor-wrap:focus-within { background: #1f1f1f; }
+  .wx-ext-editor-wrap .CodeMirror { background: #1f1f1f; color: #d4d4d4; }
+  .wx-ext-editor-wrap .CodeMirror-gutters { background: #252526; border-right-color: #333; }
+  .wx-ext-editor-wrap .CodeMirror-linenumber { color: #6e6e6e; }
+  .wx-ext-editor-wrap .cm-s-default .cm-tag { color: #569cd6; }
+  .wx-ext-editor-wrap .cm-s-default .cm-attribute { color: #9cdcfe; }
+  .wx-ext-editor-wrap .cm-s-default .cm-string { color: #ce9178; }
+  .wx-ext-editor-wrap .cm-s-default .cm-comment { color: #6a9955; }
+  .wx-ext-editor-wrap .cm-s-default .cm-keyword { color: #c586c0; }
+  .wx-ext-editor-wrap .cm-s-default .cm-bracket { color: #808080; }
+  .wx-ext-editor-wrap .cm-s-default .cm-meta { color: #9cdcfe; }
+  .CodeMirror-dialog { background: #252526; color: #ddd; border-bottom-color: #333; }
+  .CodeMirror-dialog input { background: #2a2a2a; color: #ddd; border-color: #3a3a3a; }
+
+  .wx-ext-preview-pane { background: #1f1f1f; color: #ccc; border-left-color: #333; }
+  .wx-ext-preview-pane:empty::before { color: #555; }
+
+  .wx-ext-subdialog { background: rgba(31, 31, 31, 0.94); }
+  .wx-ext-subdialog-box { background: #1f1f1f; box-shadow: 0 16px 48px rgba(0,0,0,.5); }
+  .wx-ext-subdialog-box h4 { color: #e0e0e0; }
+  .wx-ext-subdialog-box textarea { background: #2a2a2a; color: #ddd; border-color: #3a3a3a; }
+  .wx-ext-subdialog-box textarea:focus { border-color: #07c160; }
+  .wx-ext-subdialog-box label { color: #bbb; }
+
+  .wx-ext-modal-footer { background: #1f1f1f; border-top-color: #333; }
+  .wx-ext-count { color: #777; }
+  .wx-ext-hint { color: #555; }
+  .wx-ext-hint kbd { background: #2a2a2a; border-color: #3a3a3a; color: #aaa; }
+  .wx-ext-btn-cancel, .wx-ext-btn-csv-cancel { background: #2a2a2a; color: #ccc; }
+  .wx-ext-btn-cancel:hover, .wx-ext-btn-csv-cancel:hover { background: #333; }
+
+  .wx-ext-toast-warn { background: #3a2f16; color: #ffcf7d; border-color: #5a4a1a; box-shadow: 0 4px 16px rgba(0,0,0,.4); }
+  .wx-ext-toast-error { background: #3a1d1d; color: #ff8a80; border-color: #5a2a2a; }
+}
+
+/* ─── 减弱动态效果 ─── */
+@media (prefers-reduced-motion: reduce) {
+  .wx-ext-float-btn,
+  .wx-ext-modal,
+  .wx-ext-modal-overlay,
+  .wx-ext-toast {
+    animation: none !important;
+    transition: none !important;
+  }
+}
