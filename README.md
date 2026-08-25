@@ -81,6 +81,16 @@ WeChatOfficialAccount/
 - 多平台支持（秀米/135 编辑器）：架构已就绪（PLATFORMS 注册表），需实机验证选择器后启用，见 AGENTS.md「平台扩展规范」
 - 商店分发：代码已具备 MV3 兼容性，上架 Chrome Web Store 需账号与审核流程
 
+## 构建与分发
+
+### GitHub Actions 生成 CRX（无需任何证书）
+
+- 推送 `v*` 标签或手动触发 `build-crx` 工作流（`.github/workflows/build-crx.yml`），产物：`extension.crx` + `extension.zip`，标签触发自动挂 Release
+- 私钥：`openssl genrsa -out key.pem 2048` 生成一次，`base64 < key.pem` 存入仓库 Secret `CRX_PRIVATE_KEY`（**务必持久保存**，换钥会导致扩展 ID 变化、用户需重装）
+- 本地打包：`zip -r extension.zip manifest.json content.js background.js options.html options.js styles.css icons lib` 后运行 `node scripts/pack-crx.mjs extension.zip key.pem extension.crx`（脚本会打印扩展 ID，企业策略安装用）
+
+> ⚠️ 限制：Chrome 137+ 已禁止普通用户拖拽安装自签 CRX；自签 CRX 仅适用于**企业策略安装**（`ExtensionInstallForcelist`）。个人用户用「加载已解压」，面向大众请走 Chrome Web Store（$5 一次性）或 Edge Add-ons（免费）。
+
 ## 使用指南
 
 完整的使用说明、功能详解与常见问题排查见 [docs/使用指南.html](./docs/使用指南.html)。
