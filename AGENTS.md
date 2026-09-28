@@ -91,6 +91,8 @@ manifest.json           # MV3 清单：内容脚本加载序 / 权限 / 后台 /
   2. 在 `PLATFORMS` 注册表登记**实机验证过**的选择器
   3. 未实机验证的选择器**禁止启用**（占位即误导）
 - ✅ 公众号编辑器选择器必须保留三级回退；公众号改版导致失效时，优先更新 `PLATFORMS[wechat].selectors`，不得移除回退链
+- ✅ **读写只针对「内部内容」**：编辑器正文一律只读写 `.rich_media_content` 内 `div.ProseMirror[contenteditable]` 的**内部内容**。读取走 `readEditorContent(editor)`，写入范围走 `buildInsertRange(editor, mode)` + `isInnerRange(range, editor)` 守卫，待插入内容先进 `stripContainerWrappers(html)` 网关
+- ✅ 容器元素（`.rich_media_content`、`div.ProseMirror`、`.mock-iframe-*`）**不得被替换 / 删除 / 重建 / 包裹，也不得写入正文**：读取结果不得携带容器标签，插入内容不得含容器标签（否则形成嵌套顶坏结构）
 
 ### 4. 存储规范
 
@@ -176,12 +178,13 @@ WeChatOfficialAccount/
 
 - [ ] `node --check content.js` / `background.js` / `options.js` 通过
 - [ ] `node -e "require('./manifest.json')"` 解析通过
-- [ ] 纯函数（formatHtml/minifyHtml/parseDelimited/sanitizeForWeChat）用 node 内联脚本跑一轮边界用例（含引号 CSV、pre 保留、未闭合标签）
+- [ ] 纯函数（formatHtml/minifyHtml/parseDelimited/sanitizeForWeChat/stripContainerWrappers/isInnerRange）用 node 内联脚本跑一轮边界用例（含引号 CSV、pre 保留、未闭合标签、容器标签剥离与近似类名恒等、越界选区判定）
 
 ### 浏览器手动验证（公众号编辑页）
 
 - [ ] 悬浮按钮出现，编辑器就绪后提示变为「插入 HTML」
 - [ ] 弹窗打开：CodeMirror 高亮/行号/括号匹配正常，Tab 缩进、Cmd/Ctrl+F 查找可用
+- [ ] **空内容可编辑**（v1.0.4）：无草稿/无模板/未点「读取」时，点击编辑区任意位置都能获得光标并正常输入；输入后再清空仍可继续输入
 - [ ] 模板：保存/插入/删除；设置页增删后弹窗菜单同步
 - [ ] 草稿：输入后关闭重开可恢复；插入成功后清除
 - [ ] 格式化/压缩/表格生成/净化提示可用
@@ -234,6 +237,39 @@ WeChatOfficialAccount/
 ---
 
 ## 更新日志
+
+### 2026-09-28 v1.0.4 弹窗交互修复（遮罩关闭 / 空内容无法编辑）
+
+- **点击遮罩误关弹窗**：主弹窗遮罩上的 `overlay.addEventListener('click', e => { if (e.target === overlay) close(); })` 使得「点弹窗外围一圈」就关闭弹窗，其中正在编辑的 HTML 全部丢失。v1.0.4 移除该监听，关闭入口收敛为「取消」按钮与 Esc（`onDocKeydown`）；表格生成子窗口的遮罩点击仍只关自身，行为不变
+- **空内容无法编辑（根因：编辑器宿主宽度退化为内容宽度）**：`.wx-ext-editor-wrap` 是 flex 容器，但直接子元素 `#wx-ext-cm-host` 未给尺寸，宽度按 `max-content` 计算 —— 编辑器为空时宿主塌缩到行号槽宽度（无头 Chrome 实测 **47px**，长行内容时才被撑到 868px）。于是编辑区右侧大片区域属于 `editorWrap` 背景，点击落不到 CodeMirror 上，既无光标也无法输入；内容非空时宿主被长行撑开，问题被掩盖，因此只在空内容 / 短内容时暴露
+- **修复**：`styles.css` 给 `#wx-ext-cm-host` 显式尺寸 `flex: 1 1 auto; min-width: 0`（撑满编辑区 + 允许压缩，长行改由 CodeMirror 自己横向滚动，不再把宿主撑出面板被 `overflow:hidden` 裁掉）；`content.js` 再加一层兜底：`editorWrap` 上 mousedown 落在编辑区/宿主本体（而非 CM 内部已有路径）时 `preventDefault()` + `cmEditor.focus()`
+- 验证：无头 Chrome 加载弹窗结构（真实 `styles.css`）比对宿主尺寸与面板中心点的 `elementFromPoint` —— 修复前空内容 `47px` / 命中 `editorWrap` / 无法聚焦；修复后 `390px` / 命中 CM 内部 / `hasFocus=true` 且输入生效。`node --check content.js|background.js|options.js` 与 `manifest.json` 解析通过
+- 教训（通用）：**flex 容器的直接子元素不显式给尺寸 ≠ 宽度撑满**，宽度会退化为 `max-content`，而「内容为空」正是内容宽度最小的极端场景；此类缺陷只在空数据态暴露，回归必须覆盖空数据态
+
+### 2026-09-28 v1.0.3 正文容器保护修复
+
+- **读取路径带出容器标签**：`btnRead` 用 `editor.innerHTML` 取内容，若命中的元素是 `.rich_media_content`（或 `.mock-iframe-*` 包装）就会把 `view rich_media_content` / `ProseMirror` 容器整体带进弹窗，插回时形成容器嵌套。新增 `readEditorContent(editor)`（只取 `innerHTML` 内部内容 + `stripContainerWrappers` 剥离混入容器标签），`btnRead` 与双向同步 `watchEditorChanges` 统一改走该函数
+- **插入路径可能写进容器标签**：新增 `stripContainerWrappers(html)` 在插入前与 `insertHtmlToProseMirror` 写入网关各兜一次，逐层解包 `.rich_media_content` / `.ProseMirror` / `.mock-iframe-document|body`（保留内部内容，上限 20 层）；有剥离时在弹窗提示「已剥离正文容器标签，只保留内部内容」
+- **替换模式可能替换元素本身**：新增 `isInnerRange(range, editor)`，`buildInsertRange` 的替换分支明确只用 `selectNodeContents(editor)`（不再有 `selectNode(editor)` 语义），`append` 分支保存的选区与裸 DOM 兜底的 `workingRange` 都必须通过 `isInnerRange` 校验，越界（边界落到容器元素外）一律回退到「文末内部」安全范围，绝不删除/替换容器元素
+- **选择器误命中容器**：`findEditorDetail` 加 `isProseMirrorEditor` 过滤，命中元素不是 ProseMirror 本体时继续向下回退，不再把 `.rich_media_content` 当编辑器操作
+- 关键防回归点：`stripContainerWrappers` 未真正解包到容器时**原样返回入参**（`changed` 标记），杜绝 v1.0.1 那类「无条件 parse→serialize 往返改写正文」；近似类名（`not-ProseMirror-x`、`rich_media_content-wrap`）恒等通过
+- 教训（通用）：**读写托管编辑器时必须区分「容器元素」与「容器内部内容」**；`innerHTML` 取回的是内部内容，但一旦上游选择器落到容器层级，或用户从页面复制带出容器标签，就会把容器结构写回去造成嵌套 —— 读、写两端都要有「内部内容」边界校验
+
+### 2026-09-25 v1.0.2 插入位置错乱修复
+
+- **插入位置错乱（顶坏页面标签结构）**：`buildInsertRange` 只改了 DOM 选区，而 ProseMirror 的 paste/replaceSelection 用的是它 state 里的 selection；`selectionchange` 由浏览器**异步**派发，设完选区立刻 dispatch paste，PM 读到的还是旧 selection（编辑器从未 focus 过时通常停在 doc 开头）→ 内容插到错误层级。新增 `primeEditorSelection()`：应用选区 → 等两拍 → 写入前再校准一次
+- 不能用「选区是否完全相等」判断同步成功：PM 同步后会把选区**规范化回写**到等价但未必全等的位置，精确比对会 100% 误判。改为固定等待 + 校准
+- 新增 `appendedAtTail()`：追加模式下校验内容确实落在文末（只比对插入文本末尾 80 字，避免编辑器规范化开头空白导致误判），不满足则返回 `misplaced`，弹窗**保留**并提示用户核对（避免用户以为没成功而重复插入）
+- `doInsert` 拆为 `runInsert`（async）+ `doInsert`（同步外壳 catch），避免未处理的 Promise 拒绝静默失败
+- 新增编辑器命中徽标 `#wx-ext-target-badge`（选择器级别 / 内容字数 / 悬停看元素路径；同级命中多个时变黄警告），用于诊断是否误命中预览副本或摘要框
+- 教训（通用）：**托管型编辑器写入前，DOM 选区与其内部 selection 的同步是异步的**，写完立即触发变更必踩坑；同理，任何「写完马上读回比对」的校验都要考虑编辑器自己的规范化回写
+
+### 2026-09-25 v1.0.1 插入链路修复
+
+- **首次插入无效**：公众号正文 DOM 由 ProseMirror 托管，`appendChild`/`insertNode` 属外部 DOM 变更，会被 PM 用自身 state 重渲染抹掉。改为 `focus()` 激活 → `buildInsertRange` 定位光标 → paste 事件 → `execCommand('insertHTML')` → 裸 DOM 兜底三级通道；插入后比对 `innerHTML` 判断是否真正生效，未生效则返回 `unchanged` 并保留弹窗提示重试
+- **读取后插入导致内容重复/标签错乱**：「读取」拉的是全文，插入却是追加语义。新增 `insertMode`（`append` / `replace`）与底部切换按钮 `#wx-ext-btn-mode`，读取后自动切 `replace`（全选后插入即整体替换）
+- **插入内容乱码**：`sanitizeForWeChat` 原先无条件用 `DOMParser` 往返重序列化，会改写 `&nbsp;`、内联 SVG、`mp-*` 自定义标签、table 结构，并把 `&amp;` 二次转义成 `&amp;amp;`。改为仅在 `RISKY_NODE_RE` / `RISKY_ATTR_RE` 命中时才做 DOM 往返；标签闭合检查抽为纯文本逻辑 `collectTagBalanceWarnings`
+- 教训（通用）：**托管型富文本编辑器（ProseMirror / Slate / Lexical）禁止直接改 DOM 插入内容**，必须走其原生变更通道；**不要对已合法的 HTML 做无条件的 parse→serialize 往返**
 
 ### 2026-08-25 版本重置
 

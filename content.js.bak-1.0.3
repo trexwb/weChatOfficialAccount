@@ -883,10 +883,9 @@
     /* ─── 按钮操作 ─── */
     btnCancel.addEventListener('click', close);
     btnInsert.addEventListener('click', doInsert);
-    // ⚠ 遮罩点击不再关闭弹窗（v1.0.4）：弹窗里往往已有大量编辑中的 HTML，
-    // 误点弹窗外围遮罩就丢内容代价太高。关闭入口统一收敛为「取消」按钮与 Esc
-    // （见下方 onDocKeydown）。表格生成子窗口的遮罩点击仍只关子窗口（见 csvDialog 监听）。
-    // 严禁在此处恢复 overlay 的 click → close 监听。
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) close();
+    });
 
     /* ─── 插入逻辑（异步：需等待编辑器同步光标后再写入） ─── */
     async function runInsert() {
@@ -951,17 +950,6 @@
       overlay.addEventListener('animationend', removeOverlay, { once: true });
       setTimeout(removeOverlay, 300); // 动画兜底（如系统开启减弱动态效果）
     }
-
-    /* ─── 空内容守卫：点击编辑区空白处也能进入编辑 ─── */
-    // 编辑器内容为空时，CodeMirror 宿主曾因缺少显式尺寸而塌缩到内容宽度（约 47px），
-    // 编辑区右侧大片区域属于 editorWrap 背景，点击不会进入编辑器 → 表现为「空内容点不进去」。
-    // 主修复在 styles.css（#wx-ext-cm-host 显式占满编辑区）；这里再兜一层：
-    // 点击落在编辑区/宿主本体上（而不是 CM 内部已有的处理路径）时，直接把焦点交给编辑器。
-    editorWrap.addEventListener('mousedown', (e) => {
-      if (e.target !== editorWrap && e.target !== cmHost) return;
-      e.preventDefault();
-      cmEditor.focus();
-    });
 
     /* ─── 自动聚焦 ─── */
     requestAnimationFrame(() => {

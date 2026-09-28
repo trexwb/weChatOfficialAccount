@@ -1,6 +1,5 @@
 /* ============================
-   公众号HTML插入助手 — 样式 v1.0.4
-   版本真源：manifest.json（本行跟随同步，便于比对备份文件）
+   公众号HTML插入助手 — 样式 v1.0.1
    ============================ */
 
 /* ─── 悬浮按钮 ─── */
@@ -283,18 +282,6 @@
 }
 .wx-ext-editor-wrap:focus-within {
   background: #fff;
-}
-
-/* ⚠ 编辑器宿主必须显式占满编辑区（v1.0.4「空内容无法编辑」修复）
-   #wx-ext-cm-host 是 .wx-ext-editor-wrap（flex 容器）的直接子元素，不设尺寸时
-   宽度会退化为内容的 max-content：编辑器为空 → 宽度塌缩到行号槽宽度（实测约 47px），
-   编辑区右侧大片区域属于 editorWrap 背景，点击落不到 CodeMirror 上，表现为
-   「空内容时点不进去、无法输入」；内容变长后宿主被撑开才恢复正常，所以问题只在
-   空内容 / 短内容时暴露。flex:1 撑满 + min-width:0 允许压缩，长行交给 CodeMirror
-   自己横向滚动，不再把宿主撑到面板之外被裁掉。 */
-#wx-ext-cm-host {
-  flex: 1 1 auto;
-  min-width: 0;
 }
 
 /* ─── CodeMirror 主题化 ─── */
